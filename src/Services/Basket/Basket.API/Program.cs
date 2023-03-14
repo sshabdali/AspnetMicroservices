@@ -1,4 +1,6 @@
+using Basket.API.GrpcServices;
 using Basket.API.Repositories;
+using Discount.Grpc.Protos;
 
 namespace Basket.API
 {
@@ -17,6 +19,12 @@ namespace Basket.API
 
             // General Configuration
             builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+
+            // Grpc Configuration
+            builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>
+                (o => o.Address = new Uri(config["GrpcSettings:DiscountUrl"]));
+
+            builder.Services.AddScoped<DiscountGrpcService>();
 
             // Add services to the container.
 
