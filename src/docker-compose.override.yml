@@ -23,9 +23,18 @@ services:
       - POSTGRES_DB=DiscountDb
     restart: always
     ports:
-        - "5432:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+
+  orderdb:
+    container_name: orderdb
+    environment:
+        ACCEPT_EULA: "Y"
+        MSSQL_SA_PASSWORD: "P@55w0rd2019" 
+    restart: always
+    ports: 
+        - "1444:1433" 
 
   pgadmin:
     container_name: pgadmin
@@ -34,7 +43,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin1234
     restart: always
     ports:
-        - "5050:80"
+      - "5050:80"
     volumes:
       - pgadmin_data:/root/.pgadmin
 
@@ -88,3 +97,13 @@ services:
       - discountdb
     ports:
       - "8003:80"
+
+  ordering.api:
+    container_name: ordering.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:OrderingConnectionString=Server=172.26.144.1,1444;Database=OrderDb;User Id=sa;Password=P@55w0rd2019;TrustServerCertificate=True"
+    depends_on:
+        - orderdb
+    ports:
+        - "8004:80"
