@@ -1,3 +1,4 @@
+using MassTransit;
 using Basket.API.GrpcServices;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
@@ -19,12 +20,22 @@ namespace Basket.API
 
             // General Configuration
             builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+            builder.Services.AddAutoMapper(typeof(Program));
 
             // Grpc Configuration
             builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>
                 (o => o.Address = new Uri(config["GrpcSettings:DiscountUrl"]));
-
             builder.Services.AddScoped<DiscountGrpcService>();
+
+            // MassTransit-RabbitMQ Configuration
+            builder.Services.AddMassTransit(mc =>
+            {
+                mc.UsingRabbitMq((ctx, cfg) => {
+                    cfg.Host(config["EventBusSettings:HostAddress"]);
+                });
+            });
+            // not needed after MassTransit version 8
+            //builder.Services.AddMassTransitHostedService();
 
             // Add services to the container.
 
